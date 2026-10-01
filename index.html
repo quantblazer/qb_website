@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Quant Blazer | Data and automation for systematic trading</title>
+  <meta name="description" content="Quant Blazer builds the plumbing behind systematic trading: an IQFeed futures downloader, a Kraken crypto downloader, and Real Test Pilot, which runs the daily pipeline around RealTest.">
+  <link rel="icon" type="image/png" href="assets/logo.png">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-row">
+    <a class="wordmark" href="#top">Quant Blazer</a>
+    <nav aria-label="Sections">
+      <a href="#pipeline">Pipeline</a>
+      <a href="#iqfeed">IQFeed</a>
+      <a href="#kraken">Kraken</a>
+      <a href="#pilot">Real Test Pilot</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+
+  <section class="hero">
+    <div class="wrap hero-grid">
+      <div>
+        <p class="eyebrow">Systematic trading, built in Rust</p>
+        <h1>Clean data in. Tested strategies out. Every day, without babysitting.</h1>
+        <p class="lede">
+          Quant Blazer is a set of tools for running rule-based strategies on futures and crypto:
+          two downloaders that produce data you can trust, and an orchestrator that feeds it to
+          RealTest on a schedule.
+        </p>
+        <div class="actions">
+          <a class="button" href="#pipeline">See how it fits together</a>
+          <a class="button ghost" href="#pilot">Real Test Pilot</a>
+        </div>
+      </div>
+      <img class="hero-logo" src="assets/logo.png" alt="Quant Blazer logo: a shield with a rising chart" width="455" height="566">
+    </div>
+  </section>
+
+  <section id="pipeline" class="band">
+    <div class="wrap">
+      <h2>One pipeline, three projects</h2>
+      <p class="section-lede">
+        Each downloader works on its own. Real Test Pilot runs both on a schedule, checks the
+        results, and publishes them to RealTest.
+      </p>
+
+      <div class="flow" role="img" aria-label="IQFeed Downloader and Kraken Downloader feed Real Test Pilot, which validates the data and imports it into RealTest.">
+        <div class="flow-col">
+          <a class="node" href="#iqfeed">
+            <span class="node-kind">Source</span>
+            <strong>IQFeed Downloader</strong>
+            <span>Back-adjusted continuous futures, hourly and daily</span>
+          </a>
+          <a class="node" href="#kraken">
+            <span class="node-kind">Source</span>
+            <strong>Kraken Downloader</strong>
+            <span>Daily candles for every USD crypto pair</span>
+          </a>
+        </div>
+        <div class="flow-arrow" aria-hidden="true"></div>
+        <a class="node node-main" href="#pilot">
+          <span class="node-kind">Orchestrator</span>
+          <strong>Real Test Pilot</strong>
+          <span>Download, validate, sync, import</span>
+        </a>
+        <div class="flow-arrow" aria-hidden="true"></div>
+        <div class="node node-out">
+          <span class="node-kind">Destination</span>
+          <strong>RealTest</strong>
+          <span>Backtests on fresh, checked data</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="iqfeed" class="project">
+    <div class="wrap project-grid">
+      <div>
+        <p class="eyebrow">Project 01 &middot; Futures data</p>
+        <h2>IQFeed Downloader</h2>
+        <p>
+          A single Rust binary that pulls IQFeed's back-adjusted continuous futures and writes one
+          CSV per market per timeframe. Hourly bars come straight from IQFeed; daily bars are
+          built from them by trade day, so they line up with the CME Globex session.
+        </p>
+        <ul class="points">
+          <li><strong>Full refresh by default.</strong> Back-adjusted history changes at every roll, so appending to an old file would mix adjustment bases.</li>
+          <li><strong>Shrink guard.</strong> A new download replaces a file only if it keeps at least 90% of the existing rows. A truncated response never overwrites good history.</li>
+          <li><strong>Atomic, repeatable writes.</strong> Files are written to a temp file, verified, then renamed. The same data gives a byte-identical file.</li>
+          <li><strong>Built for unattended runs.</strong> Waits for IQFeed to log in, retries, and writes a per-symbol report with clear exit codes.</li>
+        </ul>
+        <p class="meta">Micro futures covered: MES, MNQ, MYM, M2K, MCL, MGC</p>
+        <p><a class="text-link" href="https://github.com/quantblazer/iqfeed_download">Source on GitHub</a></p>
+      </div>
+      <pre class="code" aria-label="Example commands and output"><code><span class="c"># check a symbol, then download everything</span>
+iqfeed-dl probe '@MES#C' --timeframe 1h
+iqfeed-dl download
+
+<span class="c"># data/continuous/MES_back_adjusted_1h.csv</span>
+timestamp,open,high,low,close,volume
+2026-09-18 16:00:00,7712.25,7729.25,7711.75,7725.5,33543</code></pre>
+    </div>
+  </section>
+
+  <section id="kraken" class="project alt">
+    <div class="wrap project-grid">
+      <div>
+        <p class="eyebrow">Project 02 &middot; Crypto data</p>
+        <h2>Kraken Downloader</h2>
+        <p>
+          Builds a local dataset of daily OHLCV candles for every USD-quoted crypto pair on Kraken.
+          It uses public endpoints only, so no API keys are needed.
+        </p>
+        <ul class="points">
+          <li><strong>Full history from two sources.</strong> Kraken's REST endpoint returns only the latest 720 candles, so older history is imported from Kraken's bulk files and the API keeps it current.</li>
+          <li><strong>Delisted pairs included.</strong> Pairs that no longer trade are kept, so backtests are not skewed by survivorship bias.</li>
+          <li><strong>Exact values.</strong> Prices and volume are stored as the decimal strings Kraken sends, with no float rounding. The still-forming day is never written.</li>
+          <li><strong>Verify command.</strong> Checks for gaps, bad timestamps and invalid bars, and compares stored candles against the live API.</li>
+        </ul>
+        <p><a class="text-link" href="https://github.com/quantblazer/kraken_download">Source on GitHub</a></p>
+      </div>
+      <pre class="code" aria-label="Example commands and output"><code><span class="c"># one-time history import, then daily updates</span>
+kraken-downloader import --path Kraken_OHLCVT.zip
+kraken-downloader update
+kraken-downloader verify
+
+<span class="c"># data/XBTUSD.csv</span>
+timestamp,symbol,open,high,low,close,volume
+2024-10-01T00:00:00Z,XBTUSD,63325.0,64100.0,60203.4,60819.1,2632.62350634</code></pre>
+    </div>
+  </section>
+
+  <section id="pilot" class="project">
+    <div class="wrap">
+      <p class="eyebrow">Project 03 &middot; Orchestration</p>
+      <h2>Real Test Pilot</h2>
+      <p class="section-lede">
+        A desktop app and always-on service that runs the daily data pipeline for RealTest. It is
+        growing into a full strategy registry, performance monitor and order executor.
+      </p>
+
+      <ol class="steps">
+        <li><span class="step-n">1</span><strong>Download</strong><span>Futures at 17:30 New York on weekdays; Kraken at 00:10 UTC daily.</span></li>
+        <li><span class="step-n">2</span><strong>Validate</strong><span>Stale bars, gaps, bad highs and lows, and outsized one-day moves raise alerts.</span></li>
+        <li><span class="step-n">3</span><strong>Sync</strong><span>Publishes daily bars to the RealTest data folders in one common layout.</span></li>
+        <li><span class="step-n">4</span><strong>Import</strong><span>Runs the RealTest import so every backtest starts on today's data.</span></li>
+      </ol>
+
+      <div class="project-grid pilot-grid">
+        <div>
+          <h3>How it is built</h3>
+          <ul class="points">
+            <li><strong>Service first.</strong> Scheduling lives in a headless service, not in the window. Closing the app hides it to the tray and the pipeline keeps running.</li>
+            <li><strong>Catch-up and retry.</strong> A run missed while the PC was off starts when the service does. A failed run is retried once.</li>
+            <li><strong>One UI, two ways in.</strong> The same React interface runs in the Tauri desktop app and in a browser, with token-protected remote access over Tailscale.</li>
+            <li><strong>Everything recorded.</strong> Each run is stored in SQLite with its status, logs and data-quality results.</li>
+          </ul>
+          <p class="meta">Rust &middot; Tauri &middot; axum &middot; SQLite &middot; React</p>
+        </div>
+
+        <div>
+          <h3>Roadmap</h3>
+          <ul class="roadmap">
+            <li class="done"><span class="tag">Built</span>Foundation: service, database, desktop shell, web UI</li>
+            <li class="done"><span class="tag">Built</span>Data pipeline: IQFeed and Kraken downloads, validation, sync, scheduler</li>
+            <li class="next"><span class="tag">Next</span>RealTest integration: strategy registry with versioning, backtest runs and charts</li>
+            <li><span class="tag">Planned</span>Performance monitoring: nightly backtests and live-versus-backtest drift alerts</li>
+            <li><span class="tag">Planned</span>Paper execution with risk checks, approvals and a kill switch</li>
+            <li><span class="tag">Planned</span>Live execution on Interactive Brokers and Kraken</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap footer-row">
+    <span class="wordmark">Quant Blazer</span>
+    <span>&copy; 2026 Quant Blazer. Software and research only; nothing here is investment advice.</span>
+  </div>
+</footer>
+
+</body>
+</html>
