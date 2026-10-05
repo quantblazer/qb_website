@@ -31,8 +31,8 @@
         <h1>Clean data in. Tested strategies out. Every day, without babysitting.</h1>
         <p class="lede">
           Quant Blazer is a set of tools for running rule-based strategies on futures and crypto:
-          two downloaders that produce data you can trust, and an orchestrator that feeds it to
-          RealTest on a schedule.
+          two downloaders that produce data you can trust, and an orchestrator that keeps
+          RealTest strategies backtested on fresh data every day.
         </p>
         <div class="actions">
           <a class="button" href="#pipeline">See how it fits together</a>
@@ -45,36 +45,29 @@
 
   <section id="pipeline" class="band">
     <div class="wrap">
-      <h2>One pipeline, three projects</h2>
+      <h2>One pipeline, from Kraken to RealTest</h2>
       <p class="section-lede">
-        Each downloader works on its own. Real Test Pilot runs both on a schedule, checks the
-        results, and publishes them to RealTest.
+        Real Test Pilot runs the Kraken download every day, checks the results and publishes
+        them to RealTest, then re-runs every strategy on the new data.
       </p>
 
-      <div class="flow" role="img" aria-label="IQFeed Downloader and Kraken Downloader feed Real Test Pilot, which validates the data and imports it into RealTest.">
-        <div class="flow-col">
-          <a class="node" href="#iqfeed">
-            <span class="node-kind">Source</span>
-            <strong>IQFeed Downloader</strong>
-            <span>Back-adjusted continuous futures, hourly and daily</span>
-          </a>
-          <a class="node" href="#kraken">
-            <span class="node-kind">Source</span>
-            <strong>Kraken Downloader</strong>
-            <span>Daily candles for every USD crypto pair</span>
-          </a>
-        </div>
+      <div class="flow" role="img" aria-label="Kraken Downloader feeds Real Test Pilot, which validates the data and imports it into RealTest.">
+        <a class="node" href="#kraken">
+          <span class="node-kind">Source</span>
+          <strong>Kraken Downloader</strong>
+          <span>Daily candles for every USD crypto pair</span>
+        </a>
         <div class="flow-arrow" aria-hidden="true"></div>
         <a class="node node-main" href="#pilot">
           <span class="node-kind">Orchestrator</span>
           <strong>Real Test Pilot</strong>
-          <span>Download, validate, sync, import</span>
+          <span>Download, validate, sync, import, backtest</span>
         </a>
         <div class="flow-arrow" aria-hidden="true"></div>
         <div class="node node-out">
           <span class="node-kind">Destination</span>
           <strong>RealTest</strong>
-          <span>Backtests on fresh, checked data</span>
+          <span>Strategies tested on fresh, checked data</span>
         </div>
       </div>
     </div>
@@ -142,15 +135,17 @@ timestamp,symbol,open,high,low,close,volume
       <p class="eyebrow">Project 03 &middot; Orchestration</p>
       <h2>Real Test Pilot</h2>
       <p class="section-lede">
-        A desktop app and always-on service that runs the daily data pipeline for RealTest. It is
-        growing into a full strategy registry, performance monitor and order executor.
+        A desktop app and always-on service that downloads Kraken data every day, publishes it to
+        RealTest and re-runs every strategy's backtest. The current focus is Kraken crypto;
+        order execution on Kraken is planned, and futures return later.
       </p>
 
       <ol class="steps">
-        <li><span class="step-n">1</span><strong>Download</strong><span>Futures at 17:30 New York on weekdays; Kraken at 00:10 UTC daily.</span></li>
-        <li><span class="step-n">2</span><strong>Validate</strong><span>Stale bars, gaps, bad highs and lows, and outsized one-day moves raise alerts.</span></li>
-        <li><span class="step-n">3</span><strong>Sync</strong><span>Publishes daily bars to the RealTest data folders in one common layout.</span></li>
-        <li><span class="step-n">4</span><strong>Import</strong><span>Runs the RealTest import so every backtest starts on today's data.</span></li>
+        <li><span class="step-n">1</span><strong>Download</strong><span>Every listed Kraken USD pair, daily at 00:10 UTC.</span></li>
+        <li><span class="step-n">2</span><strong>Validate</strong><span>Checks that yesterday's candles arrived. Problems raise alerts on the dashboard.</span></li>
+        <li><span class="step-n">3</span><strong>Sync</strong><span>Publishes the daily bars to the RealTest data folder.</span></li>
+        <li><span class="step-n">4</span><strong>Import</strong><span>Runs the RealTest import so the data file is current.</span></li>
+        <li><span class="step-n">5</span><strong>Backtest</strong><span>Re-runs every monitored strategy on the new data.</span></li>
       </ol>
 
       <div class="project-grid pilot-grid">
@@ -160,6 +155,8 @@ timestamp,symbol,open,high,low,close,volume
             <li><strong>Service first.</strong> Scheduling lives in a headless service, not in the window. Closing the app hides it to the tray and the pipeline keeps running.</li>
             <li><strong>Catch-up and retry.</strong> A run missed while the PC was off starts when the service does. A failed run is retried once.</li>
             <li><strong>One UI, two ways in.</strong> The same React interface runs in the Tauri desktop app and in a browser, with token-protected remote access over Tailscale.</li>
+            <li><strong>Versioned strategies.</strong> RealTest scripts are imported into the database. Each change becomes a new version with a line-by-line diff, and backtests never edit a script.</li>
+            <li><strong>In-sample versus out-of-sample.</strong> Every strategy has an out-of-sample start date, and results are reported on both sides of it.</li>
             <li><strong>Everything recorded.</strong> Each run is stored in SQLite with its status, logs and data-quality results.</li>
           </ul>
           <p class="meta">Rust &middot; Tauri &middot; axum &middot; SQLite &middot; React</p>
@@ -169,11 +166,12 @@ timestamp,symbol,open,high,low,close,volume
           <h3>Roadmap</h3>
           <ul class="roadmap">
             <li class="done"><span class="tag">Built</span>Foundation: service, database, desktop shell, web UI</li>
-            <li class="done"><span class="tag">Built</span>Data pipeline: IQFeed and Kraken downloads, validation, sync, scheduler</li>
-            <li class="next"><span class="tag">Next</span>RealTest integration: strategy registry with versioning, backtest runs and charts</li>
-            <li><span class="tag">Planned</span>Performance monitoring: nightly backtests and live-versus-backtest drift alerts</li>
-            <li><span class="tag">Planned</span>Paper execution with risk checks, approvals and a kill switch</li>
-            <li><span class="tag">Planned</span>Live execution on Interactive Brokers and Kraken</li>
+            <li class="done"><span class="tag">Built</span>Kraken data pipeline: download, validation, sync, scheduler</li>
+            <li class="done"><span class="tag">Built</span>RealTest integration: versioned strategy registry, daily backtests with charts, schedule settings</li>
+            <li class="next"><span class="tag">Next</span>Performance monitoring: performance history, alerts and notifications</li>
+            <li><span class="tag">Planned</span>Paper execution on Kraken with risk checks, approvals and a kill switch</li>
+            <li><span class="tag">Planned</span>Live execution on Kraken, starting with a small allocation</li>
+            <li><span class="tag">Later</span>Futures: IQFeed data (built, switched off) and Interactive Brokers execution</li>
           </ul>
         </div>
       </div>

@@ -192,7 +192,7 @@ a.node:hover { border-color: var(--ink); }
   padding: 0;
   margin: 0 0 48px;
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(5, 1fr);
   gap: 16px;
 }
 .steps li {

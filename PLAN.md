@@ -31,15 +31,17 @@ theme only. Responsive down to phone width.
 |---|---|
 | Header | Wordmark and anchor links to each section (sticky) |
 | Hero | Headline, one-paragraph summary, logo |
-| Pipeline | Diagram: IQFeed Downloader + Kraken Downloader → Real Test Pilot → RealTest |
+| Pipeline | Diagram: Kraken Downloader → Real Test Pilot → RealTest (IQFeed is not in the diagram while Real Test Pilot is Kraken only) |
 | IQFeed Downloader | What it does, four key points (full refresh, shrink guard, atomic writes, unattended runs), markets covered, example commands and CSV output, GitHub link |
 | Kraken Downloader | What it does, four key points (two sources, delisted pairs, exact values, verify), example commands and CSV output, GitHub link |
-| Real Test Pilot | Four pipeline steps (download, validate, sync, import), how it is built, roadmap with Built / Next / Planned labels |
+| Real Test Pilot | Five pipeline steps (download, validate, sync, import, backtest), how it is built, roadmap with Built / Next / Planned / Later labels |
 | Footer | Copyright and "not investment advice" line |
 
 **Source of the content:** the README and PLAN files of the three projects. The site only claims
-what those files say is built. For Real Test Pilot that means phases 1 and 2 (foundation and data
-pipeline) are shown as built; RealTest integration is "next"; monitoring and execution are "planned".
+what those files say is built. Checked against the Real Test Pilot plan on 2026-10-04: its scope is
+Kraken only for now. Phases 1 to 3 (foundation, Kraken data pipeline, RealTest integration) are shown
+as built; performance monitoring is "next"; paper and live execution on Kraken are "planned"; futures
+(IQFeed data, Interactive Brokers execution) are "later".
 
 ## Open items
 - **GitHub links.** `github.com/quantblazer/iqfeed_download` and `github.com/quantblazer/kraken_download`
