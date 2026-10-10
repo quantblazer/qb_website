@@ -5,7 +5,8 @@ A public site for Quant Blazer that presents three pieces of work and how they f
 
 1. **IQFeed Downloader** — back-adjusted continuous futures, hourly and daily CSVs.
 2. **Kraken Downloader** — daily OHLCV for every USD crypto pair on Kraken.
-3. **Real Test Pilot** — desktop app and service that runs the daily pipeline around RealTest.
+3. **Real Test Pilot** — desktop app and service that runs RealTest scripts on a schedule: daily backtests
+   for monitored strategies, order files for live ones.
 
 ## Folder layout
 ```
@@ -31,17 +32,17 @@ theme only. Responsive down to phone width.
 |---|---|
 | Header | Wordmark and anchor links to each section (sticky) |
 | Hero | Headline, one-paragraph summary, logo |
-| Pipeline | Diagram: Kraken Downloader → Real Test Pilot → RealTest (IQFeed is not in the diagram while Real Test Pilot is Kraken only) |
+| How it fits | Diagram: market data on disk → Real Test Pilot → reports and order files. States that Pilot does not download data or send orders |
 | IQFeed Downloader | What it does, four key points (full refresh, shrink guard, atomic writes, unattended runs), markets covered, example commands and CSV output, GitHub link |
 | Kraken Downloader | What it does, four key points (two sources, delisted pairs, exact values, verify), example commands and CSV output, GitHub link |
-| Real Test Pilot | Five pipeline steps (download, validate, sync, import, backtest), how it is built, roadmap with Built / Next / Planned / Later labels |
+| Real Test Pilot | Five steps (import, refresh, run, report, deliver), how it works, status list with Built / Possible labels |
 | Footer | Copyright and "not investment advice" line |
 
 **Source of the content:** the README and PLAN files of the three projects. The site only claims
-what those files say is built. Checked against the Real Test Pilot plan on 2026-10-04: its scope is
-Kraken only for now. Phases 1 to 3 (foundation, Kraken data pipeline, RealTest integration) are shown
-as built; performance monitoring is "next"; paper and live execution on Kraken are "planned"; futures
-(IQFeed data, Interactive Brokers execution) are "later".
+what those files say is built. Checked against the Real Test Pilot plan on 2026-10-10 (replanned 2026-10-07): Pilot now only
+schedules RealTest backtests and orders runs and delivers the results. Data download and broker
+execution were removed from it, so the site no longer shows them. All five parts of its status list
+are shown as built; three of its "possible next steps" are shown as "possible".
 
 ## Open items
 - **GitHub links.** `github.com/quantblazer/iqfeed_download` and `github.com/quantblazer/kraken_download`
