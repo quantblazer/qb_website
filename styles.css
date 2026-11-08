@@ -220,33 +220,7 @@ a.node:hover { border-color: var(--ink); }
   margin-bottom: 4px;
 }
 
-.roadmap { list-style: none; padding: 0; margin: 24px 0 0; display: grid; gap: 10px; }
-.roadmap li {
-  display: grid;
-  grid-template-columns: 76px 1fr;
-  gap: 14px;
-  align-items: start;
-  padding: 12px 14px;
-  background: var(--card);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
-}
-.tag {
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  text-align: center;
-  padding: 4px 0;
-  border-radius: 4px;
-  border: 1px solid var(--line);
-}
-.roadmap .done { color: var(--ink); }
-.roadmap .done .tag { background: var(--ink); border-color: var(--ink); color: var(--paper); }
-.roadmap .next { color: var(--ink); border-color: var(--accent); }
-.roadmap .next .tag { background: var(--accent); border-color: var(--accent); color: #fff; }
+.points-2col { grid-template-columns: 1fr 1fr; column-gap: 40px; }
 
 /* Footer */
 .site-footer { border-top: 1px solid var(--line); padding: 28px 0; font-size: 0.85rem; color: var(--ink-soft); }
@@ -272,6 +246,7 @@ a.node:hover { border-color: var(--ink); }
     border-right: 6px solid transparent;
   }
   .steps { grid-template-columns: 1fr 1fr; }
+  .points-2col { grid-template-columns: 1fr; }
 }
 
 @media (max-width: 480px) {
